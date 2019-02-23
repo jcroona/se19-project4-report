@@ -55,7 +55,7 @@ The required methods to access data in the class are the following:
 
 ### Requirement 4: Inheritance 
 
-The claas inherits from AbstractEvent<AuxServicesEventType>, to keep functionality.
+The class inherits from AbstractEvent<AuxServicesEventType>, to keep functionality.
 
 ### Project plan for testing requirements and refactor the code
 
@@ -90,7 +90,7 @@ The first constructor is for appEvents and the second one for containerEvents. T
 ## Existing test cases relating to refactored code
 
 The test cases tests configuration-based services and manifest-based services. The majority of tests use mock objects that try cases with different jar-files, class paths and some dependencies and overlaps. 
-The functionality of the events are mainly tested by initializing, starting and stopping. Some invalid input is tested (i.e bad username), but all properties that can have null values are not fully covered. AuxServiceEvent has 4 different constructors but only two of them are tested. To fully cover the requirements tests will be needed that cover all three constructors and all get methods.
+The functionality of the events are mainly tested by initializing, starting and stopping. Some invalid input is tested (i.e bad username), but all properties that can have null values are not fully covered. AuxServiceEvent has four different constructors but only two of them are tested. To fully cover the requirements tests will be needed that cover all of the constructors and all get methods.
 
 
 ## The refactoring carried out
