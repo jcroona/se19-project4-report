@@ -139,7 +139,7 @@ The class has currently four different constructor:
 3. `public AuxServicesEvent(AuxServicesEventType eventType, String user, ApplicationId appId, String serviceId, ByteBuffer serviceData)`
 4. `public AuxServicesEvent(AuxServicesEventType eventType, String user, ApplicationId appId, String serviceId, ByteBuffer serviceData, Container container)`
 
-The first constructor is for appEvents and the second one for containerEvents. The third one is also for appEvents but has two additional arguments, user and serviceData. The last constructor has both ApplicationId and container, but this is never used in the project. When the refactoring is carried out we will have two classes with the follwing structure:
+The first constructor is for appEvents and the second one for containerEvents. The third one is also for appEvents but has three additional arguments: `user`, `serviceId` and `serviceData`. The last constructor has both ApplicationId and container, but this is never used in the project. When the refactoring is carried out we will have two classes with the follwing structure:
 
 * AuxServicesAppEvent.java 
 
