@@ -170,24 +170,23 @@ The refactoring itself is documented by the git log.
 
 For each team member, how much time was spent in
 
-1. plenary discussions/meetings;
+1. plenary discussions/meetings; 8h 
 
-2. discussions within parts of the group;
+2. discussions within parts of the group; 6h
 
-3. reading documentation;
+3. reading documentation; 5h
 
-4. configuration;
+4. configuration; 3h
 
-5. analyzing code/output;
+5. analyzing code/output; 1h
 
-6. writing documentation;
+6. writing documentation; 4h
 
-7. writing code;
+7. writing code; 3h
 
-8. running code?
+8. running code? 1h
 
 ## Overall experience
 
-What are your main take-aways from this project? What did you learn?
+One of the main take-aways from the project is that tasks in such large projects could be more difficult than it seems. There could be a lot of dependencies that you don’t know about and it takes more time than expected. Since we chose a new project for this assignment we got some more experience from working with large scale open-source projects. 
 
-Is there something special you want to mention here?
