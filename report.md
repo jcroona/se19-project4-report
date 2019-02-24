@@ -47,7 +47,22 @@ The required constructors for the class are the following:
 
 The required methods to access data in the class are the following:
 
-* **getUser()**, returning data stored in the user field.
+ 
+| Identifier  | getUser() | 
+|---|---|
+| Requirement description  | Return the data stored in the objects user variable.  |  
+| Rationale | In order to use the data structure provided by the class the data must be easily accessible. |  
+| Need | Basic |  
+| Priority | High |
+| Source | Hadoop YARN |
+| Verifiability | The function returns the correct data. |
+| Risk | None |
+| Dependency |  None |
+| Difficulty | Low |
+
+
+
+
 * **getApplicationID()**, returning data stored in the appId field.
 * **getServiceID()**, returning data stored in the serviceId field.
 * **getServiceData()**, returning data stored in the serviceData field.
