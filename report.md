@@ -60,7 +60,6 @@ The required methods to access data in the class are the following:
 | Dependency |  None |
 | Difficulty | Low |
 
-
 | Identifier  | getApplicationID() | 
 |---|---|
 | Requirement description  | Return the data stored in the objects appId field.  |  
@@ -115,6 +114,11 @@ The required methods to access data in the class are the following:
 ### Requirement 4: Inheritance 
 
 The class inherits from AbstractEvent<AuxServicesEventType>, to keep functionality.
+
+### Requirement 5: Class dependencies
+
+The classes that depend on AuxServicesEvent must keep their functionality. These are ApplicationImpl.java, ContainerImpl.java, as well as the test classes TestApplication.java and TestContainer.java.
+
 
 ### Project plan for testing requirements and refactor the code
 
