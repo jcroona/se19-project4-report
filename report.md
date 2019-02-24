@@ -50,7 +50,7 @@ The required methods to access data in the class are the following:
  
 | Identifier  | getUser() | 
 |---|---|
-| Requirement description  | Return the data stored in the objects user variable.  |  
+| Requirement description  | Return the data stored in the objects user field. |  
 | Rationale | In order to use the data structure provided by the class the data must be easily accessible. |  
 | Need | Basic |  
 | Priority | High |
@@ -61,12 +61,56 @@ The required methods to access data in the class are the following:
 | Difficulty | Low |
 
 
+| Identifier  | getApplicationID() | 
+|---|---|
+| Requirement description  | Return the data stored in the objects appId field.  |  
+| Rationale | In order to use the data structure provided by the class the data must be easily accessible. |  
+| Need | Basic |  
+| Priority | High |
+| Source | Hadoop YARN |
+| Verifiability | The function returns the correct data. |
+| Risk | None |
+| Dependency |  None |
+| Difficulty | Low |
 
 
-* **getApplicationID()**, returning data stored in the appId field.
-* **getServiceID()**, returning data stored in the serviceId field.
-* **getServiceData()**, returning data stored in the serviceData field.
-* **getContainer()**, returning data stored in the container field.
+| Identifier  | getServiceID() | 
+|---|---|
+| Requirement description  | Return the data stored in the objects serviceId field.  |  
+| Rationale | In order to use the data structure provided by the class the data must be easily accessible. |  
+| Need | Basic |  
+| Priority | High |
+| Source | Hadoop YARN |
+| Verifiability | The function returns the correct data. |
+| Risk | None |
+| Dependency |  None |
+| Difficulty | Low |
+
+
+| Identifier  | getServiceData() | 
+|---|---|
+| Requirement description  | Return the data stored in the objects serviceData field. |  
+| Rationale | In order to use the data structure provided by the class the data must be easily accessible. |  
+| Need | Basic |  
+| Priority | High |
+| Source | Hadoop YARN |
+| Verifiability | The function returns the correct data. |
+| Risk | None |
+| Dependency |  None |
+| Difficulty | Low |
+
+
+| Identifier  | getContainer() | 
+|---|---|
+| Requirement description  | Return the data stored in the objects container field. |  
+| Rationale | In order to use the data structure provided by the class the data must be easily accessible. |  
+| Need | Basic |  
+| Priority | High |
+| Source | Hadoop YARN |
+| Verifiability | The function returns the correct data. |
+| Risk | None |
+| Dependency |  None |
+| Difficulty | Low |
 
 ### Requirement 4: Inheritance 
 
