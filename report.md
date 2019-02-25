@@ -168,6 +168,8 @@ Overall results with link to a copy of the logs (before/after refactoring).
 
 The refactoring itself is documented by the git log.
 
+The refactor is carried out on the branch: `refactor-AuxServicesEvent`
+
 ## Effort spent
 
 For each team member, how much time was spent in
