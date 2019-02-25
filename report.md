@@ -162,6 +162,8 @@ The functionality of the events are mainly tested by initializing, starting and 
 
 (Link to) a UML diagram and its description
 
+[Link to patch in a format that is acceptable to the project.](https://github.com/jcroona/se19-project4-report/blob/master/YARN-1169.patch)
+
 ## Test logs
 
 Overall results with link to a copy of the logs (before/after refactoring).
