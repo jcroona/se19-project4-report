@@ -1,0 +1,560 @@
+diff --git a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServices.java b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServices.java
+index 01611e96d06..3fcb8a49c52 100644
+--- a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServices.java
++++ b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServices.java
+@@ -848,26 +848,30 @@ public void stateChanged(Service service) {
+ 
+   @Override
+   public void handle(AuxServicesEvent event) {
++    AuxServicesAppEvent appEvent;
++    AuxServicesContainerEvent conEvent;
+     LOG.info("Got event " + event.getType() + " for appId "
+         + event.getApplicationID());
+     switch (event.getType()) {
+       case APPLICATION_INIT:
+-        LOG.info("Got APPLICATION_INIT for service " + event.getServiceID());
++        appEvent = (AuxServicesAppEvent) event;
++        LOG.info("Got APPLICATION_INIT for service " + appEvent.getServiceID());
+         AuxiliaryService service = null;
+         try {
+-          service = serviceMap.get(event.getServiceID());
++          service = serviceMap.get(appEvent.getServiceID());
+           service
+-              .initializeApplication(new ApplicationInitializationContext(event
+-                  .getUser(), event.getApplicationID(), event.getServiceData()));
++              .initializeApplication(new ApplicationInitializationContext(appEvent
++                  .getUser(), appEvent.getApplicationID(), appEvent.getServiceData()));
+         } catch (Throwable th) {
+           logWarningWhenAuxServiceThrowExceptions(service,
+               AuxServicesEventType.APPLICATION_INIT, th);
+         }
+         break;
+       case APPLICATION_STOP:
++        appEvent = (AuxServicesAppEvent) event;
+         for (AuxiliaryService serv : serviceMap.values()) {
+           try {
+-            serv.stopApplication(new ApplicationTerminationContext(event
++            serv.stopApplication(new ApplicationTerminationContext(appEvent
+                 .getApplicationID()));
+           } catch (Throwable th) {
+             logWarningWhenAuxServiceThrowExceptions(serv,
+@@ -876,12 +880,13 @@ public void handle(AuxServicesEvent event) {
+         }
+         break;
+       case CONTAINER_INIT:
++        conEvent = (AuxServicesContainerEvent) event;
+         for (AuxiliaryService serv : serviceMap.values()) {
+           try {
+             serv.initializeContainer(new ContainerInitializationContext(
+-                event.getContainer().getUser(),
+-                event.getContainer().getContainerId(),
+-                event.getContainer().getResource(), event.getContainer()
++              conEvent.getContainer().getUser(),
++              conEvent.getContainer().getContainerId(),
++              conEvent.getContainer().getResource(), conEvent.getContainer()
+                 .getContainerTokenIdentifier().getContainerType()));
+           } catch (Throwable th) {
+             logWarningWhenAuxServiceThrowExceptions(serv,
+@@ -890,11 +895,12 @@ public void handle(AuxServicesEvent event) {
+         }
+         break;
+       case CONTAINER_STOP:
++        conEvent = (AuxServicesContainerEvent) event;
+         for (AuxiliaryService serv : serviceMap.values()) {
+           try {
+             serv.stopContainer(new ContainerTerminationContext(
+-                event.getUser(), event.getContainer().getContainerId(),
+-                event.getContainer().getResource(), event.getContainer()
++                null, conEvent.getContainer().getContainerId(),
++                conEvent.getContainer().getResource(), conEvent.getContainer()
+                 .getContainerTokenIdentifier().getContainerType()));
+           } catch (Throwable th) {
+             logWarningWhenAuxServiceThrowExceptions(serv,
+diff --git a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServicesAppEvent.java b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServicesAppEvent.java
+new file mode 100644
+index 00000000000..8dd781d3d8c
+--- /dev/null
++++ b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServicesAppEvent.java
+@@ -0,0 +1,56 @@
++/**
++* Licensed to the Apache Software Foundation (ASF) under one
++* or more contributor license agreements.  See the NOTICE file
++* distributed with this work for additional information
++* regarding copyright ownership.  The ASF licenses this file
++* to you under the Apache License, Version 2.0 (the
++* "License"); you may not use this file except in compliance
++* with the License.  You may obtain a copy of the License at
++*
++*     http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*/
++
++package org.apache.hadoop.yarn.server.nodemanager.containermanager;
++
++import java.nio.ByteBuffer;
++import org.apache.hadoop.yarn.api.records.ApplicationId;
++import org.apache.hadoop.yarn.event.AbstractEvent;
++
++
++public class AuxServicesAppEvent extends AuxServicesEvent{
++
++  private final String user;
++  private final String serviceId;
++  private final ByteBuffer serviceData;
++
++
++
++  public AuxServicesAppEvent(AuxServicesEventType eventType, String user,
++      ApplicationId appId, String serviceId, ByteBuffer serviceData) {
++    super(eventType, appId);
++    this.user = user;
++    this.serviceId = serviceId;
++    this.serviceData = serviceData;
++  }
++
++  public String getServiceID() {
++    return serviceId;
++  }
++
++  public ByteBuffer getServiceData() {
++    return serviceData;
++  }
++
++  public String getUser() {
++    return user;
++  }
++
++  
++
++}
+diff --git a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServicesContainerEvent.java b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServicesContainerEvent.java
+new file mode 100644
+index 00000000000..0d5ccdc423d
+--- /dev/null
++++ b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServicesContainerEvent.java
+@@ -0,0 +1,47 @@
++/**
++* Licensed to the Apache Software Foundation (ASF) under one
++* or more contributor license agreements.  See the NOTICE file
++* distributed with this work for additional information
++* regarding copyright ownership.  The ASF licenses this file
++* to you under the Apache License, Version 2.0 (the
++* "License"); you may not use this file except in compliance
++* with the License.  You may obtain a copy of the License at
++*
++*     http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*/
++
++package org.apache.hadoop.yarn.server.nodemanager.containermanager;
++
++import org.apache.hadoop.yarn.api.records.ApplicationId;
++import org.apache.hadoop.yarn.api.records.ContainerId;
++import org.apache.hadoop.yarn.event.AbstractEvent;
++import org.apache.hadoop.yarn.server.nodemanager.containermanager.container
++    .Container;
++
++
++public class AuxServicesContainerEvent extends AuxServicesEvent {
++
++
++  private final Container container;
++
++  
++
++  public AuxServicesContainerEvent(AuxServicesEventType eventType, Container container) {
++    super(eventType, container.getContainerId().getApplicationAttemptId().getApplicationId());
++    this.container = container;
++
++  }
++
++  
++
++  public Container getContainer() {
++    return container;
++  }
++
++}
+diff --git a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServicesEvent.java b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServicesEvent.java
+index 1e5a9a737f5..ec5e0cc1e69 100644
+--- a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServicesEvent.java
++++ b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/AuxServicesEvent.java
+@@ -18,64 +18,19 @@
+ 
+ package org.apache.hadoop.yarn.server.nodemanager.containermanager;
+ 
+-import java.nio.ByteBuffer;
+-
+ import org.apache.hadoop.yarn.api.records.ApplicationId;
+-import org.apache.hadoop.yarn.api.records.ContainerId;
+ import org.apache.hadoop.yarn.event.AbstractEvent;
+-import org.apache.hadoop.yarn.server.nodemanager.containermanager.container
+-    .Container;
+ 
+-public class AuxServicesEvent extends AbstractEvent<AuxServicesEventType> {
+ 
+-  private final String user;
+-  private final String serviceId;
+-  private final ByteBuffer serviceData;
++public class AuxServicesEvent extends AbstractEvent<AuxServicesEventType> {
+   private final ApplicationId appId;
+-  private final Container container;
+-
+-  public AuxServicesEvent(AuxServicesEventType eventType, ApplicationId appId) {
+-    this(eventType, null, appId, null, null);
+-  }
+-
+-  public AuxServicesEvent(AuxServicesEventType eventType, Container container) {
+-    this(eventType, null, container.getContainerId().getApplicationAttemptId()
+-        .getApplicationId(), null, null, container);
+-  }
+-
+-  public AuxServicesEvent(AuxServicesEventType eventType, String user,
+-      ApplicationId appId, String serviceId, ByteBuffer serviceData) {
+-    this(eventType, user, appId, serviceId, serviceData, null);
+-  }
+-    public AuxServicesEvent(AuxServicesEventType eventType, String user,
+-      ApplicationId appId, String serviceId, ByteBuffer serviceData,
+-        Container container) {
+-    super(eventType);
+-    this.user = user;
++  public AuxServicesEvent(AuxServicesEventType event, ApplicationId appId) {
++    super(event);
+     this.appId = appId;
+-    this.serviceId = serviceId;
+-    this.serviceData = serviceData;
+-    this.container = container;
+   }
+-
+-  public String getServiceID() {
+-    return serviceId;
+-  }
+-
+-  public ByteBuffer getServiceData() {
+-    return serviceData;
+-  }
+-
+-  public String getUser() {
+-    return user;
+-  }
+-
+   public ApplicationId getApplicationID() {
+     return appId;
+   }
+ 
+-  public Container getContainer() {
+-    return container;
+-  }
+ 
+ }
+diff --git a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/application/ApplicationImpl.java b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/application/ApplicationImpl.java
+index ad995fb3a28..fb6755e674e 100644
+--- a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/application/ApplicationImpl.java
++++ b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/application/ApplicationImpl.java
+@@ -49,7 +49,7 @@
+ import org.apache.hadoop.yarn.proto.YarnServerNodemanagerRecoveryProtos.FlowContextProto;
+ import org.apache.hadoop.yarn.server.api.records.AppCollectorData;
+ import org.apache.hadoop.yarn.server.nodemanager.Context;
+-import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesEvent;
++import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesAppEvent;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesEventType;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.Container;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.ContainerInitEvent;
+@@ -524,7 +524,7 @@ void handleAppFinishWithContainersCleanedup() {
+ 
+     // tell any auxiliary services that the app is done 
+     this.dispatcher.getEventHandler().handle(
+-        new AuxServicesEvent(AuxServicesEventType.APPLICATION_STOP, appId));
++        new AuxServicesAppEvent(AuxServicesEventType.APPLICATION_STOP, null, appId, null, null));
+ 
+     // TODO: Trigger the LogsManager
+   }
+diff --git a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/container/ContainerImpl.java b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/container/ContainerImpl.java
+index 8aa8d0749e6..c9af750ab83 100644
+--- a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/container/ContainerImpl.java
++++ b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/main/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/container/ContainerImpl.java
+@@ -64,7 +64,8 @@
+ import org.apache.hadoop.yarn.server.nodemanager.Context;
+ import org.apache.hadoop.yarn.server.nodemanager.NMAuditLogger;
+ import org.apache.hadoop.yarn.server.nodemanager.NMAuditLogger.AuditConstants;
+-import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesEvent;
++import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesAppEvent;
++import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesContainerEvent;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesEventType;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.application.ApplicationContainerFinishedEvent;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.launcher.ContainersLauncherEvent;
+@@ -1190,7 +1191,7 @@ public ContainerState transition(ContainerImpl container,
+       final ContainerLaunchContext ctxt = container.launchContext;
+       container.metrics.initingContainer();
+ 
+-      container.dispatcher.getEventHandler().handle(new AuxServicesEvent
++      container.dispatcher.getEventHandler().handle(new AuxServicesContainerEvent
+           (AuxServicesEventType.CONTAINER_INIT, container));
+ 
+       // Inform the AuxServices about the opaque serviceData
+@@ -1200,7 +1201,7 @@ public ContainerState transition(ContainerImpl container,
+         // have distinct service data
+         for (Map.Entry<String,ByteBuffer> service : csd.entrySet()) {
+           container.dispatcher.getEventHandler().handle(
+-              new AuxServicesEvent(AuxServicesEventType.APPLICATION_INIT,
++              new AuxServicesAppEvent(AuxServicesEventType.APPLICATION_INIT,
+                   container.user, container.containerId
+                       .getApplicationAttemptId().getApplicationId(),
+                   service.getKey().toString(), service.getValue()));
+@@ -1911,7 +1912,7 @@ public void transition(ContainerImpl container, ContainerEvent event) {
+       // sent for the event, thus no need to send the CONTAINER_STOP
+       if (container.getCurrentState()
+           != org.apache.hadoop.yarn.api.records.ContainerState.NEW) {
+-        container.dispatcher.getEventHandler().handle(new AuxServicesEvent
++        container.dispatcher.getEventHandler().handle(new AuxServicesContainerEvent
+             (AuxServicesEventType.CONTAINER_STOP, container));
+       }
+       container.context.getNodeStatusUpdater().sendOutofBandHeartBeat();
+diff --git a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/TestAuxServices.java b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/TestAuxServices.java
+index 925289a1a4c..4a413a19317 100644
+--- a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/TestAuxServices.java
++++ b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/TestAuxServices.java
+@@ -519,11 +519,11 @@ public void testAuxEventDispatch() throws IOException {
+     buf.putChar('A');
+     buf.putInt(65);
+     buf.flip();
+-    AuxServicesEvent event = new AuxServicesEvent(
++    AuxServicesAppEvent event = new AuxServicesAppEvent(
+         AuxServicesEventType.APPLICATION_INIT, "user0", appId1, "Asrv", buf);
+     aux.handle(event);
+     ApplicationId appId2 = ApplicationId.newInstance(0, 66);
+-    event = new AuxServicesEvent(
++    event = new AuxServicesAppEvent(
+         AuxServicesEventType.APPLICATION_STOP, "user0", appId2, "Bsrv", null);
+     // verify all services got the stop event 
+     aux.handle(event);
+@@ -549,8 +549,8 @@ public void testAuxEventDispatch() throws IOException {
+         null, cti, context);
+     ContainerId containerId = container.getContainerId();
+     Resource resource = container.getResource();
+-    event = new AuxServicesEvent(AuxServicesEventType.CONTAINER_INIT,container);
+-    aux.handle(event);
++    AuxServicesContainerEvent event2 = new AuxServicesContainerEvent(AuxServicesEventType.CONTAINER_INIT,container);
++    aux.handle(event2);
+     for (AuxiliaryService serv : servs) {
+       assertEquals(containerId, ((LightService) serv).containerId);
+       assertEquals(resource, ((LightService) serv).resource);
+@@ -558,8 +558,8 @@ public void testAuxEventDispatch() throws IOException {
+       ((LightService) serv).resource = null;
+     }
+ 
+-    event = new AuxServicesEvent(AuxServicesEventType.CONTAINER_STOP, container);
+-    aux.handle(event);
++    event2 = new AuxServicesContainerEvent(AuxServicesEventType.CONTAINER_STOP, container);
++    aux.handle(event2);
+     for (AuxiliaryService serv : servs) {
+       assertEquals(containerId, ((LightService) serv).containerId);
+       assertEquals(resource, ((LightService) serv).resource);
+diff --git a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/TestAuxServicesAppEvent.java b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/TestAuxServicesAppEvent.java
+new file mode 100644
+index 00000000000..27e0db28a38
+--- /dev/null
++++ b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/TestAuxServicesAppEvent.java
+@@ -0,0 +1,63 @@
++/**
++* Licensed to the Apache Software Foundation (ASF) under one
++* or more contributor license agreements.  See the NOTICE file
++* distributed with this work for additional information
++* regarding copyright ownership.  The ASF licenses this file
++* to you under the Apache License, Version 2.0 (the
++* "License"); you may not use this file except in compliance
++* with the License.  You may obtain a copy of the License at
++*
++*     http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*/
++package org.apache.hadoop.yarn.server.nodemanager.containermanager.container;
++
++import static org.junit.Assert.assertEquals;
++import static org.junit.Assert.assertNotNull;
++import static org.junit.Assert.assertNull;
++import static org.junit.Assert.assertTrue;
++import org.junit.Test;
++
++import java.nio.ByteBuffer;
++import org.apache.hadoop.yarn.api.records.ApplicationId;
++import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesEvent;
++import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesAppEvent;
++import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesEventType;
++
++public class TestAuxServicesAppEvent {
++  @Test
++  public void testGetServiceId() {
++    AuxServicesAppEvent evt = 
++      new AuxServicesAppEvent(AuxServicesEventType.APPLICATION_INIT, "hadoop", null, "107", ByteBuffer.allocate(10));
++    assertEquals(evt.getServiceID(), "107");
++  }
++
++  @Test
++  public void testGetServiceData() {
++    ByteBuffer buf = ByteBuffer.allocate(10);
++    AuxServicesAppEvent evt = 
++        new AuxServicesAppEvent(AuxServicesEventType.APPLICATION_INIT, "hadoop", null, "107", buf);
++    assertEquals(evt.getServiceData(), buf);
++  }
++
++  @Test
++  public void testGetUser() {
++    AuxServicesAppEvent evt = 
++      new AuxServicesAppEvent(AuxServicesEventType.APPLICATION_INIT, "hadoop", null, "107", ByteBuffer.allocate(10));
++    assertEquals(evt.getUser(), "hadoop");
++  }
++
++  @Test
++  public void testGetAppId() {
++    ApplicationId appId = ApplicationId.newInstance(0, 66);
++    AuxServicesAppEvent evt = 
++      new AuxServicesAppEvent(AuxServicesEventType.APPLICATION_INIT, "hadoop", appId, "107", ByteBuffer.allocate(10));
++    assertEquals(evt.getApplicationID().getId() , 66);
++  }
++
++}
+\ No newline at end of file
+diff --git a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/TestAuxServicesContainerEvent.java b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/TestAuxServicesContainerEvent.java
+new file mode 100644
+index 00000000000..08792eb1940
+--- /dev/null
++++ b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/TestAuxServicesContainerEvent.java
+@@ -0,0 +1,75 @@
++/**
++* Licensed to the Apache Software Foundation (ASF) under one
++* or more contributor license agreements.  See the NOTICE file
++* distributed with this work for additional information
++* regarding copyright ownership.  The ASF licenses this file
++* to you under the Apache License, Version 2.0 (the
++* "License"); you may not use this file except in compliance
++* with the License.  You may obtain a copy of the License at
++*
++*     http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*/
++package org.apache.hadoop.yarn.server.nodemanager.containermanager.container;
++
++import static org.junit.Assert.assertEquals;
++import static org.junit.Assert.assertNotNull;
++import static org.junit.Assert.assertNull;
++import static org.junit.Assert.assertTrue;
++import org.junit.Test;
++
++import java.nio.ByteBuffer;
++import org.apache.hadoop.yarn.api.records.ApplicationId;
++import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesContainerEvent;
++import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesEventType;
++
++import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.*;
++
++import org.apache.hadoop.yarn.api.records.ApplicationAttemptId;
++import org.apache.hadoop.yarn.api.records.ApplicationId;
++import org.apache.hadoop.yarn.api.records.ContainerId;
++import org.apache.hadoop.yarn.api.records.Priority;
++import org.apache.hadoop.yarn.api.records.Resource;
++import org.apache.hadoop.yarn.conf.YarnConfiguration;
++import org.apache.hadoop.yarn.server.nodemanager.Context;
++import org.apache.hadoop.yarn.security.ContainerTokenIdentifier;
++import static org.mockito.Mockito.mock;
++
++
++public class TestAuxServicesContainerEvent {
++  @Test
++  public void testGetContainer() {
++    ApplicationId appId1 = ApplicationId.newInstance(0, 65);
++    ApplicationAttemptId attemptId = ApplicationAttemptId.newInstance(appId1, 1);
++    ContainerTokenIdentifier cti = new ContainerTokenIdentifier(
++        ContainerId.newContainerId(attemptId, 1), "", "",
++        Resource.newInstance(1, 1), 0,0,0, Priority.newInstance(0), 0);
++    Context context = mock(Context.class);
++    Container container = new ContainerImpl(new YarnConfiguration(), null, null, null, null, cti, context);
++    AuxServicesContainerEvent evt = 
++      new AuxServicesContainerEvent(AuxServicesEventType.CONTAINER_INIT, container);
++    assertEquals(evt.getContainer(), container);
++  }
++
++  @Test
++  public void testGetAppId() {
++    ApplicationId appId1 = ApplicationId.newInstance(0, 65);
++    ApplicationAttemptId attemptId = ApplicationAttemptId.newInstance(appId1, 1);
++    ContainerTokenIdentifier cti = new ContainerTokenIdentifier(
++        ContainerId.newContainerId(attemptId, 1), "", "",
++        Resource.newInstance(1, 1), 0,0,0, Priority.newInstance(0), 0);
++        Context context = mock(Context.class);
++    Container container = new ContainerImpl(new YarnConfiguration(), null, null, null, null, cti, context);
++    AuxServicesContainerEvent evt = 
++      new AuxServicesContainerEvent(AuxServicesEventType.CONTAINER_INIT, container);
++    assertEquals(evt.getApplicationID().getId(), container.getContainerId().getApplicationAttemptId().getApplicationId().getId());
++  }
++
++  
++
++}
+\ No newline at end of file
+diff --git a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/application/TestApplication.java b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/application/TestApplication.java
+index e3907f8d251..c8ad203a978 100644
+--- a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/application/TestApplication.java
++++ b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/application/TestApplication.java
+@@ -44,6 +44,7 @@
+ import org.apache.hadoop.yarn.server.api.records.impl.pb.MasterKeyPBImpl;
+ import org.apache.hadoop.yarn.server.nodemanager.Context;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesEvent;
++import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesAppEvent;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesEventType;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.Container;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.ContainerEvent;
+@@ -265,8 +266,8 @@ public void testAppFinishedOnRunningContainers() {
+               wa.app), "timestamp"));
+ 
+       verify(wa.auxBus).handle(
+-          refEq(new AuxServicesEvent(
+-              AuxServicesEventType.APPLICATION_STOP, wa.appId)));
++          refEq(new AuxServicesAppEvent(
++              AuxServicesEventType.APPLICATION_STOP, null, wa.appId, null, null)));
+ 
+       wa.appResourcesCleanedup();
+       for (Container container : wa.containers) {
+diff --git a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/container/TestContainer.java b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/container/TestContainer.java
+index 4d7559ec236..2bb0ff3e6f4 100644
+--- a/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/container/TestContainer.java
++++ b/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/src/test/java/org/apache/hadoop/yarn/server/nodemanager/containermanager/container/TestContainer.java
+@@ -78,6 +78,7 @@
+ import org.apache.hadoop.yarn.server.nodemanager.DeletionService;
+ import org.apache.hadoop.yarn.server.nodemanager.NodeManager;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesEvent;
++import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesAppEvent;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServicesEventType;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.application.Application;
+ import org.apache.hadoop.yarn.server.nodemanager.containermanager.application.ApplicationEvent;
+@@ -943,8 +944,8 @@ public void testServiceData() throws Exception {
+       
+       for (final Map.Entry<String,ByteBuffer> e : wc.serviceData.entrySet()) {
+         ArgumentMatcher<AuxServicesEvent> matchesServiceReq =
+-            evt -> e.getKey().equals(evt.getServiceID())
+-                && 0 == e.getValue().compareTo(evt.getServiceData());
++            evt -> (evt instanceof AuxServicesAppEvent) && e.getKey().equals(((AuxServicesAppEvent)evt).getServiceID())
++                && 0 == e.getValue().compareTo(((AuxServicesAppEvent)evt).getServiceData());
+         verify(wc.auxBus).handle(argThat(matchesServiceReq));
+       }
+ 
