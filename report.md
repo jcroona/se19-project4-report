@@ -162,6 +162,7 @@ The functionality of the events are mainly tested by initializing, starting and 
 
 (Link to) a UML diagram and its description
 [UML diagram before](https://github.com/jcroona/se19-project4-report/blob/master/UML_before.png)
+
 [UML diagram after](https://github.com/jcroona/se19-project4-report/blob/master/UML_after.png)
 
 [Link to patch in a format that is acceptable to the project.](https://github.com/jcroona/se19-project4-report/blob/master/YARN-1169.patch)
