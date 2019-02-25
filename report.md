@@ -166,6 +166,8 @@ The functionality of the events are mainly tested by initializing, starting and 
 
 Overall results with link to a copy of the logs (before/after refactoring).
 
+[Link to test logs (before/after refactoring)](https://github.com/jcroona/se19-project4-report/blob/master/testlog.md)
+
 The refactoring itself is documented by the git log.
 
 The refactor is carried out on the branch: `refactor-AuxServicesEvent`
