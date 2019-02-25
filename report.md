@@ -182,21 +182,32 @@ The refactor is carried out on the branch: `refactor-AuxServicesEvent`
 
 For each team member, how much time was spent in
 
-1. plenary discussions/meetings; 8h 
+1. plenary discussions/meetings; 6h 
 
-2. discussions within parts of the group; 6h
+2. discussions within parts of the group; 3h
 
 3. reading documentation; 5h
 
-4. configuration; 3h
+4. configuration; 4h
 
-5. analyzing code/output; 1h
+5. analyzing code/output; 4h
 
 6. writing documentation; 4h
 
-7. writing code; 3h
+7. writing code; 4h
 
 8. running code? 1h
+
+#### Time spent on choosing a project:
+We spent several hours on choosing a project to work with. 
+
+One project that we looked at was geode. We estimate that around 2 hours (as a group) only looking at refactor issues with geode. This included reading documentation/code and trying to figure out if the issues were feasible - as well as actually figuring out how to building the project and running the tests. One issue that we actually considered doing was the issue: ["AsyncEventServiceImpl needs refactored"](https://issues.apache.org/jira/browse/USERGRID-1107). We actually started writing some plans for refactoring the code based on this issue, but then realized that were some uncertainties regarding error handling that was too complex for us to solve, so we dropped the issue. We also spent a lot of time looking at other projects than geode as well.
+
+In addition to this, when we eventually chose our project (hadoop yarn) figuring out how to build the project and run the tests took a few hours. For instance, none of us had any experience with maven or docker which made the building take more time than expected. Running individual tests inside a single module also took some time figuring out. This was partly due to unclear documentation (in our opinion).
+
+We estimate that it took around 8-9 hours to find our issue and figure out how to build it and run the tests, to start working with the refactor itself.
+
+
 
 ## Overall experience
 
