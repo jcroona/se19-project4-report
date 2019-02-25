@@ -2,11 +2,11 @@
 
 ## Project
 
-Name: Hadoop
+Name: Hadoop YARN
 
 URL: https://github.com/apache/hadoop
 
-One or two sentences describing it
+The fundamental idea of YARN is to split up the functionalities of resource management and job scheduling/monitoring into separate daemons. The idea is to have a global ResourceManager (RM) and per-application ApplicationMaster (AM).
 
 ## Architectural overview (optional, as one item for P+)
 
