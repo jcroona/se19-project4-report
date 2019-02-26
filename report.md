@@ -207,6 +207,7 @@ In addition to this, when we eventually chose our project (hadoop yarn) figuring
 
 We estimate that it took around 8-9 hours to find our issue and figure out how to build it and run the tests, to start working with the refactor itself.
 
+We estimated that we had roughly 4 hours per person left to reach 30 hours spent per person. We spent the remaining time choosing a second issue in the same project that we set up a list of functional requirements for as well as a short project plan for how the refactoring should be done.
 
 
 ## Overall experience
@@ -262,3 +263,9 @@ The classes RouterClientRMService and RouterRMAdminService creates pipelines of 
 
 
 ### Project plan for testing requirements and refactor the code
+
+1. Modify tests to fully cover all functional requirements.
+2. Assert that the requirements are fulfilled in the programs current state.
+3. Create new util class.
+4. Refactor getInterceptorClassNames() first since the other ones depends on this.
+5. Then refactor other methods and make sure they pass all tests.
