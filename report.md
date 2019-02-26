@@ -21,7 +21,7 @@ The issue is to refactor the AuxServicesEvent class into two separate classes; A
 ## Onboarding experience
 
 The onboarding documentation was quite extensive but building the project was complex and demanding, the project has a lot of dependencies and compiling the project takes a very long time. The recommended way of getting a build environment setup is to use docker, which adds to the number of tools that is required to build and develop the project, and it also adds some overhead, especially on OS X, as docker then runs the containers in a virtual machine with a high performance impact.
-It is also very difficult to run individual tests and running all the tests is also very time consuming and demanding of the system. 
+Running all the tests is also very time consuming and demanding of the system. 
 
 
 ## Requirements affected by functionality being refactored
