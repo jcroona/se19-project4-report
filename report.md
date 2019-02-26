@@ -10,7 +10,7 @@ The fundamental idea of YARN is to split up the functionalities of resource mana
 
 ## Architectural overview (optional, as one item for P+)
 
-## Selected issue(s)
+## Selected issue #1
 
 Title: Refactor AuxServicesEvent into a AuxServicesAppEvent and AuxServicesContainerEvent.
 
@@ -213,3 +213,52 @@ We estimate that it took around 8-9 hours to find our issue and figure out how t
 
 One of the main take-aways from the project is that tasks in such large projects could be more difficult than it seems. There could be a lot of dependencies that you don’t know about and it takes more time than expected. Since we chose a new project for this assignment we got some more experience from working with large scale open-source projects. 
 
+
+## Selected issue #2
+
+Title: Refactoring Router services to use common util classes for pipeline creations.
+
+URL: https://issues.apache.org/jira/browse/YARN-6572
+
+The classes RouterClientRMService and RouterRMAdminService creates pipelines of interceptors from its configuration and user. The creation of the pipelines can be refactored to use a common utility class.
+
+## Requirements affected by functionality being refactored
+
+| Identifier  | createRequestInterceptorChain() | 
+|---|---|
+| Requirement description | Create and return reference of the first intercepter in the chain of request interceptor instances. |  
+| Rationale | To create a pipeline needed to handle multiple requests. |  
+| Need | Basic |  
+| Priority | High |
+| Source | Hadoop YARN |
+| Verifiability | The pipelines are created correctly. |
+| Risk | None |
+| Dependency | The method depend on the getConfig() and getInterceptorClassNames() methods. |
+| Difficulty | Medium |
+
+| Identifier  | getInterceptorClassNames() | 
+|---|---|
+| Requirement description  | Return comma separated interceptor class names from the configuration. |  
+| Rationale | In order to get a list of interceptor class names to be used when creating the request interceptor chain. |  
+| Need | Basic |  
+| Priority | High |
+| Source | Hadoop YARN |
+| Verifiability | The class names are returned correctly in the right format. |
+| Risk | None |
+| Dependency |  None |
+| Difficulty | Low |
+
+| Identifier  | initializePipeline() | 
+|---|---|
+| Requirement description  |  Initializes the request interceptor pipeline for the specified application. |  
+| Rationale | Needed to be able to init the pipeline after it has been created and add to the map to ensure thread safe. |  
+| Need | Basic |  
+| Priority | High |
+| Source | Hadoop YARN |
+| Verifiability | The pipelines are initialized and created correctly. |
+| Risk | None |
+| Dependency | createRequestInterceptorChain() for creating pipeline before init. |
+| Difficulty | Low |
+
+
+### Project plan for testing requirements and refactor the code
