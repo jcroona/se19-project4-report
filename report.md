@@ -176,8 +176,7 @@ Overall results with link to a copy of the logs (before/after refactoring).
 
 The refactoring itself is documented by the git log.
 
-The refactor is carried out on the branch: `refactor-AuxServicesEvent`
-[Link to branch refactor-AuxServicesEvent](https://github.com/jcroona/hadoop/tree/refactor-AuxServicesEvent)
+The refactor is carried out on the branch: [refactor-AuxServicesEvent](https://github.com/jcroona/hadoop/tree/refactor-AuxServicesEvent)
 
 ## Effort spent
 
