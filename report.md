@@ -269,3 +269,5 @@ The classes RouterClientRMService and RouterRMAdminService creates pipelines of 
 3. Create new util class.
 4. Refactor getInterceptorClassNames() first since the other ones depends on this.
 5. Then refactor other methods and make sure they pass all tests.
+
+[UML diagram](https://github.com/jcroona/se19-project4-report/blob/master/UML_issue_2.png)
